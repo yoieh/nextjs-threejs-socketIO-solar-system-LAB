@@ -21,7 +21,8 @@ const data = require("./lib/hexSphere");
 // fake DB
 const messages = {
   chat1: [],
-  mapData: data
+  mapData: data,
+  updatedTiles: []
 };
 
 // socket.io server
@@ -33,9 +34,10 @@ io.on("connection", socket => {
 });
 
 io.on("connection", socket => {
-  socket.on("game.map.data", data => {
+  socket.on("game.map.tile.update", data => {
     // messages["chat1"].push(data);
-    socket.broadcast.emit("game.map.data", data);
+    console.log(data);
+    socket.broadcast.emit("game.map.tile.update", data);
   });
 });
 

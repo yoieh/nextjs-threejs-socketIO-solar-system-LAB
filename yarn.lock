@@ -2201,6 +2201,10 @@ fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
 
+fast-simplex-noise@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/fast-simplex-noise/-/fast-simplex-noise-3.2.0.tgz#ae0b3cd7b9c2a056ecc72c2f7440cf7d0e3bca96"
+
 figgy-pudding@^3.1.0, figgy-pudding@^3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.1.tgz#862470112901c727a0e495a80744bd5baa1d6790"

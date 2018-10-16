@@ -2,7 +2,7 @@ import fetch from "isomorphic-unfetch";
 
 import { drawCanvasMap } from "../lib/newVoronoi";
 // import geoVoronoiData, { smallData } from "../data/geoVoronoiData";
-import display from "../lib/display";
+import display, { updateTile } from "../lib/display";
 
 export default class Test extends React.Component {
   // fetch old messages data from the server
@@ -29,13 +29,14 @@ export default class Test extends React.Component {
   subscribe = () => {
     if (this.state.subscribe && !this.state.subscribed) {
       // connect to WS server and listen event
-      this.props.socket.on("game.map.data", this.handleMessage);
+      this.props.socket.on("game.map.tile.update", this.handleMessage);
       this.setState({ subscribed: true });
-      display(window, this.state.messages);
+      display(window, this.state.messages, this.props.socket);
     }
   };
 
   componentDidMount() {
+    console.clear();
     this.subscribe();
   }
 
@@ -55,7 +56,8 @@ export default class Test extends React.Component {
 
   // add messages from server to the state
   handleMessage = message => {
-    this.setState(state => ({ messages: state.messages.concat(message) }));
+    console.log(message);
+    updateTile(message);
   };
 
   handleChange = event => {
@@ -63,11 +65,6 @@ export default class Test extends React.Component {
   };
 
   render() {
-    return (
-      <div className="hello">
-        <p>Hello World</p>
-        <div id="display" />
-      </div>
-    );
+    return <div className="hello" />;
   }
 }
