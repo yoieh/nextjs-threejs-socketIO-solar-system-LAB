@@ -21,7 +21,7 @@ const data = require("./lib/hexSphere");
 // fake DB
 const messages = {
   chat1: [],
-  mapData: { planet: data(30), moon: data(5) },
+  mapData: { planet: data(30), moon: data(6) },
   updatedTiles: []
 };
 
