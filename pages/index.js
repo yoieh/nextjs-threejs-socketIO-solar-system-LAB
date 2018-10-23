@@ -1,24 +1,28 @@
-import { Component } from "react";
-import Link from "next/link";
 import fetch from "isomorphic-unfetch";
+import threeEntryPoint from "../threejs/threeEntryPoint";
 
-class ChatOne extends Component {
-  // fetch old messages data from the server
+import { drawCanvasMap } from "../lib/newVoronoi";
+// import geoVoronoiData, { smallData } from "../data/geoVoronoiData";
+// import display, { updateTile, updatePlantsPositions } from "../lib/display";
+
+export default class Test extends React.Component {
+  // fetch old packages data from the server
   static async getInitialProps({ req }) {
-    const response = await fetch("http://localhost:3000/messages/chat1");
-    const messages = await response.json();
-    return { messages };
+    // const response = await fetch("http://localhost:3000/game/map/data");
+    const response = await fetch("http://localhost:3000/game/map/data");
+    const packages = await response.json();
+    return { packages };
   }
 
   static defaultProps = {
-    messages: []
+    packages: []
   };
 
-  // init state with the prefetched messages
+  // init state with the prefetched packages
   state = {
     field: "",
     newMessage: 0,
-    messages: this.props.messages,
+    packages: this.props.packages,
     subscribe: false,
     subscribed: false
   };
@@ -26,13 +30,20 @@ class ChatOne extends Component {
   subscribe = () => {
     if (this.state.subscribe && !this.state.subscribed) {
       // connect to WS server and listen event
-      this.props.socket.on("message.chat1", this.handleMessage);
+      this.props.socket.on("game.map.tile.update", this.handleMessage);
+      this.props.socket.on("game.map.planets.position", this.updatePlants);
+
       this.setState({ subscribed: true });
+      // display(window, this.state.packages, this.props.socket);
     }
   };
 
   componentDidMount() {
+    console.clear();
     this.subscribe();
+    this.setState({
+      threeUpdate: threeEntryPoint(this.threeRootElement, this.state.packages)
+    });
   }
 
   componentDidUpdate() {
@@ -44,65 +55,27 @@ class ChatOne extends Component {
     return null;
   }
 
-  // close socket connection
+  // // close socket connection
   componentWillUnmount() {
-    this.props.socket.off("message.chat1", this.handleMessage);
+    this.props.socket.off("game.map.tile.update", () => {});
+    this.props.socket.off("game.map.planets.position", () => {});
   }
 
-  // add messages from server to the state
+  // // add packages from server to the state
   handleMessage = message => {
-    this.setState(state => ({ messages: state.messages.concat(message) }));
+    console.log(message);
   };
 
-  handleChange = event => {
-    this.setState({ field: event.target.value });
+  updatePlants = message => {
+    // updatePlantsPositions(message);
+    this.state.threeUpdate.update(message);
   };
 
-  // send messages to server and add them to the state
-  handleSubmit = event => {
-    event.preventDefault();
-
-    // create message object
-    const message = {
-      id: new Date().getTime(),
-      value: this.state.field
-    };
-
-    // send object to WS server
-    this.props.socket.emit("message.chat1", message);
-
-    // add it to state and clean current input value
-    this.setState(state => ({
-      field: "",
-      messages: state.messages.concat(message)
-    }));
-  };
+  // handleChange = event => {
+  //   this.setState({ field: event.target.value });
+  // };
 
   render() {
-    return (
-      <main>
-        <div>
-          <Link href={"/"}>
-            <a>{"Chat One"}</a>
-          </Link>
-          <ul>
-            {this.state.messages.map(message => (
-              <li key={message.id}>{message.value}</li>
-            ))}
-          </ul>
-          <form onSubmit={e => this.handleSubmit(e)}>
-            <input
-              onChange={this.handleChange}
-              type="text"
-              placeholder="Hello world!"
-              value={this.state.field}
-            />
-            <button>Send</button>
-          </form>
-        </div>
-      </main>
-    );
+    return <div ref={element => (this.threeRootElement = element)} />;
   }
 }
-
-export default ChatOne;
