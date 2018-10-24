@@ -29,7 +29,11 @@ export default (canvas, packages) => {
   const sun = new Sun(scene);
 
   const solar_orbit = new SolarOrbit(scene);
-  const planets = createPlanets(solar_orbit.object, packages.planets);
+  const planets = createPlanets(solar_orbit.object, {
+    planetData: packages.planets,
+    hexData: packages.hexData
+  });
+  const planetsObjs = planets.map(p => p.object);
 
   sun.object.add(solar_orbit.object);
 
@@ -85,8 +89,14 @@ export default (canvas, packages) => {
     return cameraControls;
   }
 
-  function createPlanets(sun_orbit, planetData) {
-    return planetData.map(p => new Planet(sun_orbit, p));
+  function createPlanets(sun_orbit, { planetData, hexData }) {
+    return planetData.map(
+      p =>
+        new Planet(sun_orbit, {
+          planetData: p,
+          hexData: hexData[p.ID]
+        })
+    );
   }
 
   function update() {
@@ -136,11 +146,11 @@ export default (canvas, packages) => {
     raycaster.setFromCamera(mousePosition, camera);
 
     // let intersects = raycaster.intersectObjects(solar_orbit);
-    let intersects = raycaster.intersectObjects(scene.children);
-
-    console.log(scene.children, solar_orbit);
-    for (var i = 0; i < intersects.length; i++) {
-      console.log[intersects[i]];
+    let intersects = raycaster.intersectObjects(planetsObjs);
+    if (intersects.length > 0) {
+      console.log(intersects[0]);
+      const palnet = planets.find(p => p.ID === intersects[0].object.ID);
+      palnet.select();
     }
   }
 

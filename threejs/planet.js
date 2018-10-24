@@ -1,17 +1,16 @@
 import * as THREE from "three";
 
-export default (sun_orbit, planetData /*updatingTiles*/) => {
-  let color;
-  let planetGroup = new THREE.Group();
-  let geometry = new THREE.Geometry();
-
+export default (sun_orbit, { planetData, hexData } /*updatingTiles*/) => {
   const planet = tempPlanet(planetData);
+  const hexMap = hexPlanet();
 
   sun_orbit.add(planet);
 
-  const hexPlanet = () => {
-    for (let i = 0; i < planetData.length; i++) {
-      const t = planetData[i];
+  function hexPlanet(params) {
+    let color, geometry;
+    const planetGroup = new THREE.Group();
+    for (let i = 0; i < hexData.length; i++) {
+      const t = hexData[i];
       const noise = t.noise;
 
       // var latLon = t.getLatLon(data.radius);
@@ -58,22 +57,24 @@ export default (sun_orbit, planetData /*updatingTiles*/) => {
         color = color = new THREE.Color("rgb(	255, 255, 255 )");
       }
 
-      let material = new THREE.MeshLambertMaterial({
-        color: color,
-        transparent: true,
-        opacity: 1
-        // emissive: color
-      });
+      const material = new THREE.MeshBasicMaterial({ color: color });
+
+      // let material = new THREE.MeshLambertMaterial({
+      //   color: color,
+      //   transparent: true,
+      //   opacity: 1
+      //   // emissive: color
+      // });
 
       let mesh = new THREE.Mesh(geometry, material.clone());
       mesh.ID = t.id;
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      updatingTiles(mesh);
-
+      // updatingTiles(mesh);
       planetGroup.add(mesh);
     }
-  };
+    return planetGroup;
+  }
 
   function tempPlanet(key) {
     const geometry = new THREE.SphereGeometry(30, 32, 32);
@@ -95,27 +96,54 @@ export default (sun_orbit, planetData /*updatingTiles*/) => {
         ...p.position
       }
     };
-    p.lastData = { ...p.data };
     return p;
   }
 
-  function update(time) {
-    planet.rot += planet.data.rotSpeed;
-    planet.rotation.set(0, planet.data.rot, 0);
+  function select() {
+    sun_orbit.remove(this.object);
 
-    planet.orbit = planet.orbit;
-    planet.position.set(
-      planet.data.position.x,
-      planet.data.position.y,
-      planet.data.position.z
+    console.log(hexMap);
+
+    hexMap.ID = this.object.ID;
+    hexMap.orbitRadius = this.object.orbitRadius;
+    hexMap.rotSpeed = this.object.rotSpeed;
+    hexMap.rot = this.object.rot;
+    hexMap.orbitSpeed = this.object.orbitSpeed;
+    hexMap.orbit = this.object.orbit;
+    hexMap.position.set(
+      this.object.position.x,
+      this.object.position.y,
+      this.object.position.z
     );
+    hexMap.data = {
+      rot: this.object.rot,
+      rotation: this.object.rotation,
+      orbit: this.object.orbit,
+      position: {
+        ...this.object.position
+      }
+    };
 
-    planet.lastData = planet.data;
+    this.object = hexMap;
+
+    sun_orbit.add(this.object);
+  }
+
+  function update(time) {
+    this.object.rot += this.object.data.rotSpeed;
+    this.object.rotation.set(0, this.object.data.rot, 0);
+
+    this.object.orbit = this.object.orbit;
+    this.object.position.set(
+      this.object.data.position.x,
+      this.object.data.position.y,
+      this.object.data.position.z
+    );
   }
 
   function updateData(data) {
-    planet.data = data;
+    this.object.data = data;
   }
 
-  return { update, updateData, ID: planet.ID, object: planet };
+  return { update, updateData, ID: planet.ID, object: planet, select, hexMap };
 };
