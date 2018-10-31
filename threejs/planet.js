@@ -76,18 +76,19 @@ export default (sun_orbit, { planetData, hexData } /*updatingTiles*/) => {
     return planetGroup;
   }
 
-  function tempPlanet(key) {
-    const geometry = new THREE.SphereGeometry(30, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  function tempPlanet(data) {
+    const geometry = new THREE.SphereGeometry(data.size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0x55ffff });
     let p = new THREE.Mesh(geometry, material);
 
-    p.ID = key.ID;
-    p.orbitRadius = key.orbitRadius;
-    p.rotSpeed = key.rotSpeed;
-    p.rot = key.rot;
-    p.orbitSpeed = key.orbitSpeed;
-    p.orbit = key.orbit;
-    p.position.set(key.position.x, key.position.y, key.position.z);
+    p.ID = data.ID;
+    p.orbitRadius = data.orbitRadius;
+    p.rotSpeed = data.rotSpeed;
+    p.rot = data.rot;
+    p.orbitSpeed = data.orbitSpeed;
+    p.orbit = data.orbit;
+    p.position.set(data.position.x, data.position.y, data.position.z);
+    p.size = data.size;
     p.data = {
       rot: p.rot,
       rotation: p.rotation,
@@ -99,23 +100,21 @@ export default (sun_orbit, { planetData, hexData } /*updatingTiles*/) => {
     return p;
   }
 
-  function select() {
+  function reset() {
     sun_orbit.remove(this.object);
 
-    console.log(hexMap);
-
-    hexMap.ID = this.object.ID;
-    hexMap.orbitRadius = this.object.orbitRadius;
-    hexMap.rotSpeed = this.object.rotSpeed;
-    hexMap.rot = this.object.rot;
-    hexMap.orbitSpeed = this.object.orbitSpeed;
-    hexMap.orbit = this.object.orbit;
-    hexMap.position.set(
+    planet.ID = this.object.ID;
+    planet.orbitRadius = this.object.orbitRadius;
+    planet.rotSpeed = this.object.rotSpeed;
+    planet.rot = this.object.rot;
+    planet.orbitSpeed = this.object.orbitSpeed;
+    planet.orbit = this.object.orbit;
+    planet.position.set(
       this.object.position.x,
       this.object.position.y,
       this.object.position.z
     );
-    hexMap.data = {
+    planet.data = {
       rot: this.object.rot,
       rotation: this.object.rotation,
       orbit: this.object.orbit,
@@ -124,9 +123,34 @@ export default (sun_orbit, { planetData, hexData } /*updatingTiles*/) => {
       }
     };
 
-    this.object = hexMap;
+    this.object = planet;
 
     sun_orbit.add(this.object);
+  }
+
+  function select(newScene) {
+    // sun_orbit.remove(this.object);
+    hexMap.ID = this.object.ID;
+    hexMap.orbitRadius = this.object.orbitRadius;
+    hexMap.rotSpeed = this.object.rotSpeed;
+    hexMap.rot = this.object.rot;
+    hexMap.orbitSpeed = this.object.orbitSpeed;
+    hexMap.orbit = this.object.orbit;
+    hexMap.position.set(0, 0, 0);
+    hexMap.data = {
+      rot: this.object.rot,
+      rotation: this.object.rotation,
+      orbit: this.object.orbit
+      // position: {
+      //   ...this.object.position
+      // }
+    };
+
+    this.hexPlanet = hexMap;
+
+    newScene.add(this.hexPlanet);
+
+    return this;
   }
 
   function update(time) {
@@ -145,5 +169,14 @@ export default (sun_orbit, { planetData, hexData } /*updatingTiles*/) => {
     this.object.data = data;
   }
 
-  return { update, updateData, ID: planet.ID, object: planet, select, hexMap };
+  return {
+    update,
+    updateData,
+    ID: planet.ID,
+    object: planet,
+    planet,
+    select,
+    reset,
+    hexMap
+  };
 };

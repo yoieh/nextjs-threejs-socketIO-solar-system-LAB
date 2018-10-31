@@ -1,8 +1,14 @@
 import SceneManager from "./ScreenManager";
+import Stats from "stats-js";
 
 export default (container, packages) => {
   const canvas = createCanvas(document, container);
   const sceneManager = new SceneManager(canvas, packages);
+  let stats = new Stats();
+  stats.domElement.style.position = "absolute";
+  stats.domElement.style.left = "0px";
+  stats.domElement.style.top = "0px";
+  document.body.appendChild(stats.domElement);
 
   let canvasHalfWidth;
   let canvasHalfHeight;
@@ -48,8 +54,11 @@ export default (container, packages) => {
   }
 
   function render(time) {
+    stats.begin();
+
     requestAnimationFrame(render);
     sceneManager.update();
+    stats.end();
   }
 
   function update(data) {

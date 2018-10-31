@@ -8,6 +8,7 @@ import Sun from "./sun";
 import SolarOrbit from "./solarOrbit";
 
 export default (canvas, packages) => {
+  let selected = false;
   const clock = new THREE.Clock();
   const origin = new THREE.Vector3(0, 0, 0);
 
@@ -22,9 +23,13 @@ export default (canvas, packages) => {
   };
 
   const scene = buildScene();
+  const scene2 = buildScene();
+
   const renderer = buildRender(screenDimensions);
   const camera = buildCamera(screenDimensions);
   const cameraControls = buildCameraControls(camera, renderer);
+
+  // scene.add(camera);
 
   const sun = new Sun(scene);
 
@@ -33,6 +38,7 @@ export default (canvas, packages) => {
     planetData: packages.planets,
     hexData: packages.hexData
   });
+
   const planetsObjs = planets.map(p => p.object);
 
   sun.object.add(solar_orbit.object);
@@ -75,17 +81,16 @@ export default (canvas, packages) => {
       farPlane
     );
 
-    // camera.position.z = 40;
-
-    camera.position.set(0, 5, 1.5).setLength(500);
-
     return camera;
   }
 
   function buildCameraControls(camera, renderer) {
     const cameraControls = new OrbitControls(camera, renderer.domElement);
-    cameraControls.target.set(0, 0, 0);
+    // cameraControls.target.set(0, 0, 0);
+    camera.position.set(0, 20, 100);
 
+    cameraControls.update();
+    cameraControls.enablePan = false;
     return cameraControls;
   }
 
@@ -101,24 +106,25 @@ export default (canvas, packages) => {
 
   function update() {
     const elapsedTime = clock.getElapsedTime();
+    cameraControls.update();
 
-    planets.forEach(p => {
-      p.update(elapsedTime);
-    });
+    if (selected) {
+      // selected.update(elapsedTime);
 
-    // for (let i = 0; i < sceneSubjects.length; i++)
-    //   sceneSubjects[i].update(elapsedTime);
-
-    // updateCameraPositionRelativeToMouse();
-
-    renderer.render(scene, camera);
+      renderer.render(scene2, camera);
+    } else {
+      planets.forEach(p => {
+        p.update(elapsedTime);
+      });
+      renderer.render(scene, camera);
+    }
   }
 
-  function updateCameraPositionRelativeToMouse() {
-    camera.position.x += (mousePosition.x * 0.01 - camera.position.x) * 0.01;
-    camera.position.y += (-(mousePosition.y * 0.01) - camera.position.y) * 0.01;
-    camera.lookAt(origin);
-  }
+  // function updateCameraPositionRelativeToMouse() {
+  //   camera.position.x += (mousePosition.x * 0.01 - camera.position.x) * 0.01;
+  //   camera.position.y += (-(mousePosition.y * 0.01) - camera.position.y) * 0.01;
+  //   camera.lookAt(origin);
+  // }
 
   function onWindowResize() {
     const { width, height } = canvas;
@@ -148,9 +154,15 @@ export default (canvas, packages) => {
     // let intersects = raycaster.intersectObjects(solar_orbit);
     let intersects = raycaster.intersectObjects(planetsObjs);
     if (intersects.length > 0) {
-      console.log(intersects[0]);
       const palnet = planets.find(p => p.ID === intersects[0].object.ID);
-      palnet.select();
+
+      for (const planet of planets) {
+        if (planet.object.ID !== intersects[0].object.ID) {
+          planet.reset();
+        } else {
+          selected = palnet.select(scene2);
+        }
+      }
     }
   }
 

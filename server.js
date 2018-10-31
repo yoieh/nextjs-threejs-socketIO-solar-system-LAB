@@ -19,11 +19,11 @@ const data = require("./lib/hexSphere");
 // let polygons = nearestVoronoi("0, 0", smallData);
 
 const planets = () => {
-  let max = 30,
+  let max = 50,
     min = 10,
     planetsArray = [],
     planetHexData = {};
-  for (let i = 0, radii = 0; i < 5; i++) {
+  for (let i = 0, radii = 30; i < 8; i++) {
     const size = Math.floor((Math.random() * (max - min)) / 2) * 2 + min;
     let planet = {
       ID: i,
@@ -31,7 +31,8 @@ const planets = () => {
       rotSpeed: 0.005 + Math.random() * 0.01,
       rot: Math.random(),
       orbitSpeed: (0.02 - i * 0.0048) * 0.25,
-      orbit: Math.random() * Math.PI * 2
+      orbit: Math.random() * Math.PI * 2,
+      size
     };
     planet.radii = planet.orbitRadius + size;
     planet.rotSpeed *= Math.random() < 0.1 ? -1 : 1;
@@ -106,7 +107,7 @@ const update = () => {
     }
 
     update();
-  }, 1000 / 60);
+  }, 1000 / 25);
 };
 
 nextApp.prepare().then(() => {

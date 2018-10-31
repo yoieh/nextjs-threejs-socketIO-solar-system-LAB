@@ -5,7 +5,7 @@ export default (scene /*updatingTiles*/) => {
   // let planetGroup = new THREE.Group();
   // let geometry = new THREE.Geometry();
 
-  const geometry = new THREE.SphereGeometry(50, 32, 32);
+  const geometry = new THREE.SphereGeometry(80, 32, 32);
   const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
   const sun = new THREE.Mesh(geometry, material);
 
